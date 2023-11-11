@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pcbook.v1;
+
+import "proto/pcbook/v1/memory_message.proto";
+
+option go_package = "github.com/kittichanr/pcbook/proto";
+
+message Storage {
+  enum Driver {
+    UNKNOWN = 0;
+    HDD = 1;
+    SDD = 2;
+  }
+
+  Driver driver = 1;
+  Memory momory = 2;
+}
