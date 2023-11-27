@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 
 	proto "github.com/kittichanr/pcbook/internal/gen/proto/pcbook/v1"
@@ -15,9 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func createLaptop(laptopClient proto.LaptopServiceClient) {
-	laptop := sample.NewLaptop()
-	laptop.Id = ""
+func createLaptop(laptopClient proto.LaptopServiceClient, laptop *proto.Laptop) {
 	req := &proto.CreateLaptopRequest{
 		Laptop: laptop,
 	}
@@ -75,6 +76,90 @@ func searchLaptop(
 	}
 }
 
+func uploadImage(
+	laptopClient proto.LaptopServiceClient,
+	laptopID string,
+	imagePath string,
+) {
+	file, err := os.Open(imagePath)
+	if err != nil {
+		log.Fatal("cannot open image file: ", err)
+	}
+	defer file.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := laptopClient.UploadImage(ctx)
+	if err != nil {
+		log.Fatal("cannot upload image: ", err)
+	}
+	req := &proto.UploadImageRequest{
+		Data: &proto.UploadImageRequest_Info{
+			Info: &proto.ImageInfo{
+				LaptopId:  laptopID,
+				ImageType: filepath.Ext(imagePath),
+			},
+		},
+	}
+
+	err = stream.Send(req)
+	if err != nil {
+		log.Fatal("cannot send image info: ", err, stream.RecvMsg(nil))
+	}
+	reader := bufio.NewReader(file)
+	buffer := make([]byte, 1024)
+
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal("cannot read chunk to buffer: ", err)
+		}
+
+		req := &proto.UploadImageRequest{
+			Data: &proto.UploadImageRequest_ChunkData{
+				ChunkData: buffer[:n],
+			},
+		}
+		err = stream.Send(req)
+		if err != nil {
+			log.Fatal("cannot send chunk to server: ", err)
+		}
+	}
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatal("cannot receive response: ", err)
+	}
+	log.Printf("image uploaded with id: %s, size %d", res.GetId(), res.GetSize())
+}
+
+func testCreateLaptop(laptopClient proto.LaptopServiceClient) {
+	createLaptop(laptopClient, sample.NewLaptop())
+}
+
+func testSearchLaptop(laptopClient proto.LaptopServiceClient) {
+	for i := 0; i < 10; i++ {
+		createLaptop(laptopClient, sample.NewLaptop())
+	}
+
+	filter := &proto.Filter{
+		MaxPriceUsd: 3000,
+		MinCpuCores: 4,
+		MinCpuGhz:   2.5,
+		MinRam:      &proto.Memory{Value: 0, Unit: proto.Memory_GIGABYTE},
+	}
+	searchLaptop(laptopClient, filter)
+}
+
+func testUploadImage(laptopClient proto.LaptopServiceClient) {
+	laptop := sample.NewLaptop()
+	createLaptop(laptopClient, laptop)
+	uploadImage(laptopClient, laptop.GetId(), "tmp/laptop.jpg")
+}
+
 func main() {
 	serverAddress := flag.String("address", "", "the server address")
 	flag.Parse()
@@ -85,15 +170,8 @@ func main() {
 		log.Fatal("cannot dial server: ", err)
 	}
 	laptopClient := proto.NewLaptopServiceClient(conn)
-	for i := 0; i < 10; i++ {
-		createLaptop(laptopClient)
-	}
 
-	filter := &proto.Filter{
-		MaxPriceUsd: 3000,
-		MinCpuCores: 4,
-		MinCpuGhz:   2.5,
-		MinRam:      &proto.Memory{Value: 0, Unit: proto.Memory_GIGABYTE},
-	}
-	searchLaptop(laptopClient, filter)
+	// testCreateLaptop(laptopClient)
+	// testSearchLaptop(laptopClient)
+	testUploadImage(laptopClient)
 }

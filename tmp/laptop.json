@@ -1,27 +1,27 @@
 {
- "id":  "763be2ee-b0a6-4915-95b4-b15fce356925",
+ "id":  "e02758ec-16b2-4c5f-bd28-c3dcc0483344",
  "brand":  "Apple",
- "name":  "Macbook Pro",
+ "name":  "Macbook Air",
  "cpu":  {
   "brand":  "Intel",
-  "name":  "Core i3-1005G1",
-  "number_cores":  8,
-  "number_threads":  8,
-  "min_ghz":  3.014328867137896,
-  "max_ghz":  3.061805600103099
+  "name":  "Core i7-9750H",
+  "number_cores":  2,
+  "number_threads":  11,
+  "min_ghz":  2.1605140702926815,
+  "max_ghz":  2.772049599987618
  },
  "ram":  {
-  "value":  "25",
+  "value":  "54",
   "unit":  "GIGABYTE"
  },
  "gpus":  [
   {
-   "brand":  "Nvidia",
-   "name":  "GTX 1660-Ti",
-   "min_ghz":  1.114940604766422,
-   "max_ghz":  1.1915634841328162,
+   "brand":  "AMD",
+   "name":  "RX 580",
+   "min_ghz":  1.4958540166978906,
+   "max_ghz":  2.9810413988136846,
    "memory":  {
-    "value":  "3",
+    "value":  "4",
     "unit":  "GIGABYTE"
    }
   }
@@ -30,33 +30,33 @@
   {
    "driver":  "SDD",
    "memory":  {
-    "value":  "671",
+    "value":  "733",
     "unit":  "GIGABYTE"
    }
   },
   {
    "driver":  "HDD",
    "memory":  {
-    "value":  "2",
+    "value":  "5",
     "unit":  "TERABYTE"
    }
   }
  ],
  "screen":  {
-  "size_inch":  15.466181,
+  "size_inch":  13.469927,
   "resolution":  {
-   "width":  6867,
-   "height":  3863
+   "width":  4366,
+   "height":  2456
   },
-  "panel":  "IPS",
+  "panel":  "OLED",
   "multitouch":  false
  },
  "keyboard":  {
   "layout":  "QWERTY",
-  "backlist":  true
+  "backlist":  false
  },
- "weight_kg":  1.7780162101075394,
- "price_usd":  3476.610299741591,
- "release_year":  2017,
- "updated_at":  "2023-11-18T03:42:42.167581Z"
+ "weight_kg":  1.6070003311701297,
+ "price_usd":  2009.3396879536035,
+ "release_year":  2016,
+ "updated_at":  "2023-11-26T03:10:44.310145Z"
 }
